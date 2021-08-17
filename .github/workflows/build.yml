@@ -14,8 +14,8 @@ jobs:
       - id: package
         name: Extract package info
         run: |
-          echo "::set-output name=version::$(jq .version package.json)"
-          echo "::set-output name=name::$(jq .name package.json)"
+          echo "::set-output name=version::$(jq -r .version package.json)"
+          echo "::set-output name=name::$(jq -r .name package.json)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -35,7 +35,7 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.version }}
+            ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.version }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
