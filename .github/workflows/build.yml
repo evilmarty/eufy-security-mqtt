@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.3
 
-      - id: config
-        name: Extract config version
+      - id: package
+        name: Extract package info
         run: |
           echo "::set-output name=version::$(jq .version package.json)"
           echo "::set-output name=name::$(jq .name package.json)"
@@ -35,7 +35,7 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.image.outputs.version }}
+            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.version }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
