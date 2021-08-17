@@ -17,7 +17,7 @@ const {
 const { id } = require('./utils')
 
 class BaseComponent {
-  constructorgateway, device, property) {
+  constructor(gateway, device, property) {
     this.gateway = gateway
     this.device = device
     this.property = property
