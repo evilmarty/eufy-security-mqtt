@@ -1,0 +1,33 @@
+{
+  "name": "eufy-security-mqtt",
+  "version": "0.0.0",
+  "description": "Eufy Security to MQTT Gateway intended for use with Home Assistant or other platforms that use the MQTT discovery mechanism.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/cli.js",
+    "help": "node src/cli.js --help"
+  },
+  "keywords": [
+    "eufy",
+    "eufysecurity",
+    "mqtt",
+    "homeassistant"
+  ],
+  "author": {
+    "name": "Marty Zalega",
+    "email": "marty@zalega.me"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 16.6.1",
+    "npm": ">= 7.20.3"
+  },
+  "dependencies": {
+    "eufy-security-client": "^1.0.0",
+    "mqtt": "^4.2.8",
+    "node-fetch": "^2.6.1",
+    "winston": "^3.3.3",
+    "yaml": "^1.10.2",
+    "yargs": "^17.1.0"
+  }
+}
