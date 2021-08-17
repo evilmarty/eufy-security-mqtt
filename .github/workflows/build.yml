@@ -14,10 +14,12 @@ jobs:
       - id: package
         name: Extract package info
         run: |
-          echo "::set-output name=version::$(jq -r .version package.json)"
-          echo "::set-output name=major_minor::$(jq -r '.version | split(\".\") | .[:2] | join(\".\")' package.json)"
-          echo "::set-output name=major::$(jq -r '.version | split(\".\") | first' package.json)"
-          echo "::set-output name=name::$(jq -r .name package.json)"
+          VERSION=$(jq -r .version package.json)
+          MAJOR_MINOR=$(jq -r '.version | split(".") | .[:2] | join(".")' package.json)
+          MAJOR=$(jq -r '.version | split(".") | first' package.json)
+          echo "::set-output name=version::${VERSION}"
+          echo "::set-output name=major_minor::${MAJOR_MINOR}"
+          echo "::set-output name=major::${MAJOR}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -37,6 +39,7 @@ jobs:
         with:
           push: true
           tags: |
+            ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.version }}
             ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.major_minor }}
             ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.major }}
