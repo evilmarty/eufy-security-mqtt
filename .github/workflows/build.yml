@@ -17,9 +17,9 @@ jobs:
           VERSION=$(jq -r .version package.json)
           MAJOR_MINOR=$(jq -r '.version | split(".") | .[:2] | join(".")' package.json)
           MAJOR=$(jq -r '.version | split(".") | first' package.json)
-          echo "::set-output name=version::${VERSION}"
-          echo "::set-output name=major_minor::${MAJOR_MINOR}"
-          echo "::set-output name=major::${MAJOR}"
+          echo "::set-output name=version::v${VERSION}"
+          echo "::set-output name=major_minor::v${MAJOR_MINOR}"
+          echo "::set-output name=major::v${MAJOR}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -40,9 +40,9 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.version }}
-            ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.major_minor }}
-            ghcr.io/${{ github.repository }}:v${{ steps.package.outputs.major }}
+            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.version }}
+            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.major_minor }}
+            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.major }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
