@@ -17,10 +17,10 @@ exports.ARM_HOME = 'armed_home'
 exports.DISARM = 'disarmed'
 
 exports.DEVICE_CLASS = {
-  charging_days: null,
+  charging_days: undefined,
   charing_total: 'power_factor',
   charging_reserve: 'power_factor',
-  charging_missing: null,
+  charging_missing: undefined,
   battery_usage_last_week: 'power_factor',
   custom_locked: 'lock',
   custom_motionDetected: 'motion',
@@ -36,13 +36,13 @@ exports.DEVICE_CLASS = {
   [CommandType.CMD_GET_BATTERY_TEMP]: 'temperature',
   [CommandType.CMD_GET_WIFI_RSSI]: 'signal_strength',
   [CommandType.CMD_GET_SUB1G_RSSI]: 'signal_strength',
-  [ParamType.PRIVATE_MODE]: null,
+  [ParamType.PRIVATE_MODE]: undefined,
   [CommandType.CMD_DEV_LED_SWITCH]: 'light',
   [CommandType.CMD_INDOOR_LED_SWITCH]: 'light',
   [CommandType.CMD_BAT_DOORBELL_SET_LED_ENABLE]: 'light',
   [ParamType.COMMAND_LED_NIGHT_OPEN]: 'light',
-  [CommandType.CMD_GET_DEV_STATUS]: null,
+  [CommandType.CMD_GET_DEV_STATUS]: undefined,
   [CommandType.CMD_ENTRY_SENSOR_STATUS]: 'opening',
-  [CommandType.CMD_ENTRY_SENSOR_CHANGE_TIME]: null,
-  [CommandType.CMD_MOTION_SENSOR_PIR_EVT]: null,
+  [CommandType.CMD_ENTRY_SENSOR_CHANGE_TIME]: undefined,
+  [CommandType.CMD_MOTION_SENSOR_PIR_EVT]: undefined,
 }
