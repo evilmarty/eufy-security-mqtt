@@ -1,9 +1,11 @@
-name: Docker Build
+name: Build
 
 on:
-  push:
-    branches:
-      - main
+  release:
+  workflow_run:
+    workflows: ["Release"]
+    branches: [main]
+    types: [completed]
 
 jobs:
   build:
@@ -12,53 +14,27 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.3
 
-      - id: package
+      - id: details
         name: Extract package info
-        run: |
-          VERSION=$(jq -r .version package.json)
-          MAJOR_MINOR=$(jq -r '.version | split(".") | .[:2] | join(".")' package.json)
-          MAJOR=$(jq -r '.version | split(".") | first' package.json)
-          echo "::set-output name=build_version::${VERSION}"
-          echo "::set-output name=version::v${VERSION}"
-          echo "::set-output name=major_minor::v${MAJOR_MINOR}"
-          echo "::set-output name=major::v${MAJOR}"
-
-      - uses: actions/github-script@v4
-        name: Create version release
-        id: release
         env:
-          VERSION: ${{ steps.package.outputs.version }}
-          COMMIT: ${{ github.sha }}
-        with:
-          script: |
-            try {
-              await github.repos.createRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_name: process.env.VERSION,
-                target_commitish: process.env.COMMIT,
-              })
-              core.setOutput('created', 'yes')
-            }
-            catch (error) {
-              if (error.status === 422) {
-                core.setOutput('created', 'no')
-              }
-              else {
-                throw error
-              }
-            }
+          IMAGE_REPO: ghcr.io/${{ github.repository }}
+          TAGS: ghcr.io/${{ github.repository }}:latest
+          REF: ${{ github.ref }}
+        run: |
+          for tag in $(echo "$REF" | jq -R -r 'scan("refs\\/tags\\/(.+)") | map(split(".") as $parts | reduce range($parts | length) as $n ([]; . + [$parts[:$n+1] | join(".")])) | flatten | .[]'); do
+            printf -v TAGS "${TAGS}\n${IMAGE_REPO}:${tag}"
+          done
+          VERSION=$(jq -r .version package.json)
+          echo "::set-output name=tags::${TAGS}"
+          echo "::set-output name=version::${VERSION}"
 
       - name: Set up QEMU
-        if: steps.release.outputs.created == 'yes'
         uses: docker/setup-qemu-action@v1
 
       - name: Set up Docker Buildx
-        if: steps.release.outputs.created == 'yes'
         uses: docker/setup-buildx-action@v1
 
       - name: Login to GHCR
-        if: steps.release.outputs.created == 'yes'
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -66,16 +42,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        if: steps.release.outputs.created == 'yes'
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.version }}
-            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.major_minor }}
-            ghcr.io/${{ github.repository }}:${{ steps.package.outputs.major }}
+          tags: ${{ steps.details.outputs.tags }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.package.outputs.build_version }}
+            org.opencontainers.image.version=${{ steps.details.outputs.version }}

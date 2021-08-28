@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.3
+
+      - id: package
+        name: Extract package info
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "::set-output name=version::v${VERSION}"
+
+      - uses: actions/github-script@v4
+        name: Create version release
+        id: release
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+          COMMIT: ${{ github.sha }}
+        with:
+          script: |
+            try {
+              await github.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: process.env.VERSION,
+                target_commitish: process.env.COMMIT,
+              })
+              core.setOutput('created', 'yes')
+            }
+            catch (error) {
+              if (error.status === 422) {
+                core.setOutput('created', 'no')
+              }
+              else {
+                throw error
+              }
+            }
