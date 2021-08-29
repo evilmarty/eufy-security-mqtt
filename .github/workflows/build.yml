@@ -21,7 +21,7 @@ jobs:
           TAGS: ghcr.io/${{ github.repository }}:latest
           REF: ${{ github.ref }}
         run: |
-          for tag in $(echo "$REF" | jq -R -r 'scan("refs\\/tags\\/(.+)") | map(split(".") as $parts | reduce range($parts | length) as $n ([]; . + [$parts[:$n+1] | join(".")])) | flatten | .[]'); do
+          for tag in $(jq -r '.version | split(".") as $parts | reduce range($parts | length) as $n ([]; . + [$parts[:$n+1] | join(".")]) | .[]' package.json); do
             printf -v TAGS "${TAGS}\n${IMAGE_REPO}:${tag}"
           done
           VERSION=$(jq -r .version package.json)
