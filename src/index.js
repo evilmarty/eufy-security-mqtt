@@ -122,7 +122,9 @@ class Gateway {
     })
 
     this.mqttClient.on('connect', async () => {
-      this.logger.info('Connected to MQTT broker. Connecting to Eufy Security...')
+      const { options } = this.mqttClient
+      this.logger.info(`Connected to MQTT broker: ${options.protocol}://${options.host}:${options.port}`)
+      this.logger.info('Connecting to Eufy Security...')
       const connected = await this.eufyClient.connect()
       if (!connected) {
         this.logger.error('Could not connect to Eufy Security.')
