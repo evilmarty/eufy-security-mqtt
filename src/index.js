@@ -5,6 +5,8 @@ const { STATUS_ONLINE, STATUS_OFFLINE } = require('./constants')
 const factory = require('./lookup')
 const { id, topic, sleep } = require('./utils')
 
+const DUMMY_COMPONENT = { id: '+', type: '+' }
+
 class Gateway {
   constructor(options) {
     this.options = options
@@ -45,8 +47,6 @@ class Gateway {
         retain: options.mqttRetain,
       },
     })
-
-    this.mqttClient.subscribe(topic(options.selfTopicRoot, 'command', '#'))
 
     this.eufyClient.on('connect', () => {
       this.publishAvailability(true)
@@ -124,6 +124,18 @@ class Gateway {
     this.mqttClient.on('connect', async () => {
       const { options } = this.mqttClient._client
       this.logger.info(`Connected to MQTT broker: ${options.protocol}://${options.hostname}:${options.port}`)
+
+      await Promise.allSettled([
+        this.mqttClient.subscribe(this.commandTopic(DUMMY_COMPONENT)),
+        this.mqttClient.subscribe(this.availabilityTopic),
+        this.mqttClient.subscribe(this.stateTopic(DUMMY_COMPONENT)),
+        this.mqttClient.subscribe(this.configTopic(DUMMY_COMPONENT)),
+      ])
+      await Promise.allSettled([
+        this.mqttClient.unsubscribe(this.availabilityTopic),
+        this.mqttClient.unsubscribe(this.stateTopic(DUMMY_COMPONENT)),
+        this.mqttClient.unsubscribe(this.configTopic(DUMMY_COMPONENT)),
+      ])
 
       this.logger.info('Connecting to Eufy Security...')
       const connected = await this.eufyClient.connect()
