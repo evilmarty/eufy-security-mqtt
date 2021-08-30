@@ -1,5 +1,5 @@
 const winston = require('winston')
-const mqtt = require('mqtt')
+const mqtt = require('async-mqtt')
 const { EufySecurity, GuardMode, ParamType, CommandType } = require('eufy-security-client')
 const { STATUS_ONLINE, STATUS_OFFLINE } = require('./constants')
 const factory = require('./lookup')
@@ -122,8 +122,9 @@ class Gateway {
     })
 
     this.mqttClient.on('connect', async () => {
-      const { options } = this.mqttClient
-      this.logger.info(`Connected to MQTT broker: ${options.protocol}://${options.host}:${options.port}`)
+      const { options } = this.mqttClient._client
+      this.logger.info(`Connected to MQTT broker: ${options.protocol}://${options.hostname}:${options.port}`)
+
       this.logger.info('Connecting to Eufy Security...')
       const connected = await this.eufyClient.connect()
       if (!connected) {
@@ -174,25 +175,23 @@ class Gateway {
     return topic(this.options.hassTopicRoot, component.type, component.id, 'config')
   }
 
-  publish(topic, data) {
+  async publish(topic, data) {
     if (data === null || data === undefined) {
       return
     }
 
-    const payload = data instanceof Buffer ? data : (typeof(data) === 'object' ? JSON.stringify(data) : String(data))
+    const isBuffer = data instanceof Buffer
+    const payload = isBuffer ? data : (typeof(data) === 'object' ? JSON.stringify(data) : String(data))
+    const detail = isBuffer ? `(${data.length} bytes)` : payload
 
-    return new Promise((resolve, reject) => {
-      this.mqttClient.publish(topic, payload, { retain: this.options.mqttRetain }, (error) => {
-        const detail = data instanceof Buffer ? `(${data.length} bytes)` : payload
-        if (error) {
-          this.logger.error(`Publish failed - ${topic}: ${detail}`)
-          reject(error)
-        } else {
-          this.logger.debug(`Published message - ${topic}: ${detail}`)
-          resolve(payload)
-        }
-      })
-    })
+    try {
+      await this.mqttClient.publish(topic, payload, { retain: this.options.mqttRetain })
+      this.logger.debug(`Published message - ${topic}: ${detail}`)
+    }
+    catch (error) {
+      this.logger.debug(`Publish failed - ${topic}: ${detail}`)
+      throw error
+    }
   }
 
   async publishAvailability(available) {
