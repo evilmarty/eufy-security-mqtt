@@ -2,7 +2,7 @@ const fs = require('fs')
 const yargs = require('yargs/yargs')
 const YAML = require('yaml')
 const { hideBin } = require('yargs/helpers')
-const Bridge = new require('./index')
+const Gateway = new require('./index')
 
 const PARSERS = [JSON, YAML]
 
@@ -124,4 +124,4 @@ const argv =
     .exitProcess()
     .parse()
 
-new Bridge(argv)
+new Gateway(argv)
