@@ -6,6 +6,23 @@ const Gateway = new require('./index')
 
 const PARSERS = [JSON, YAML]
 
+function parseConfig(configPath) {
+  const content = fs.readFileSync(configPath, 'utf-8')
+  let lastError = new Error('No parsers configured')
+  for (const parser of PARSERS) {
+    try {
+      return parser.parse(content)
+    }
+    catch (error) {
+      lastError = error
+      if (!(error instanceof SyntaxError)) {
+        throw error
+      }
+    }
+  }
+  throw lastError
+}
+
 const argv =
   yargs(hideBin(process.argv))
     .scriptName('eufy-security-mqtt')
@@ -105,22 +122,7 @@ const argv =
     })
     .conflicts('mqtt-url', ['mqtt-host', 'mqtt-port'])
     .help()
-    .config('config', configPath => {
-      const content = fs.readFileSync(configPath, 'utf-8')
-      let lastError = new Error('No parsers configured')
-      for (const parser of PARSERS) {
-        try {
-          return parser.parse(content)
-        }
-        catch (error) {
-          lastError = error
-          if (!(error instanceof SyntaxError)) {
-            throw error
-          }
-        }
-      }
-      throw lastError
-    })
+    .config('config', parseConfig)
     .exitProcess()
     .parse()
 
