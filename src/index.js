@@ -1,5 +1,5 @@
 const winston = require('winston')
-const mqtt = require('async-mqtt')
+const MQTT = require('async-mqtt')
 const { EufySecurity, GuardMode, ParamType, CommandType } = require('eufy-security-client')
 const { STATUS_ONLINE, STATUS_OFFLINE } = require('./constants')
 const factory = require('./lookup')
@@ -33,18 +33,18 @@ class Gateway {
       password: options.password,
     }, options.debug ? this.logger : undefined)
 
-    this.mqttClient = mqtt.connect(options.mqttUrl, {
-      host: options.mqttHost,
-      port: options.mqttPort,
+    this.mqttClient = MQTT.connect(options.mqtt.url, {
+      host: options.mqtt.host,
+      port: options.mqtt.port,
       protocol: 'mqtt',
-      username: options.mqttUser,
-      password: options.mqttPass,
+      username: options.mqtt.username,
+      password: options.mqtt.password,
       clientId: `eufy-security-mqtt_${Math.random().toString(16).substr(2, 8)}`,
-      reconnectPeriod: options.reconnectPeriod,
+      reconnectPeriod: options.mqtt.reconnectPeriod,
       will: {
         topic: this.availabilityTopic,
         payload: STATUS_OFFLINE,
-        retain: options.mqttRetain,
+        retain: options.mqtt.retain,
       },
     })
 
@@ -197,7 +197,7 @@ class Gateway {
     const detail = isBuffer ? `(${data.length} bytes)` : payload
 
     try {
-      await this.mqttClient.publish(topic, payload, { retain: this.options.mqttRetain })
+      await this.mqttClient.publish(topic, payload, { retain: this.options.mqtt.retain })
       this.logger.debug(`Published message - ${topic}: ${detail}`)
     }
     catch (error) {

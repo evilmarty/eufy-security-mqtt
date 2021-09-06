@@ -39,49 +39,52 @@ const argv =
       describe: 'Eufy Security password',
       type: 'string',
     })
-    .option('mqtt-url', {
+    .option('mqtt.url', {
+      alias: 'mqtt-url',
       describe: 'MQTT broker URL',
       type: 'string',
+      conflicts: ['mqtt.host', 'mqtt.port'],
     })
-    .option('mqtt-host', {
-      alias: 'h',
+    .option('mqtt.host', {
+      alias: ['h', 'mqtt-host'],
       describe: 'MQTT hostname',
       type: 'string',
     })
-    .option('mqtt-port', {
-      alias: 'P',
+    .option('mqtt.port', {
+      alias: ['P', 'mqtt-port'],
       describe: 'MQTT port',
       type: 'number',
     })
-    .option('mqtt-username', {
-      alias: 'mqtt-user',
+    .option('mqtt.username', {
+      alias: ['mqtt-user', 'mqtt-username'],
       describe: 'MQTT username',
       type: 'string',
     })
-    .option('mqtt-password', {
-      alias: 'mqtt-pass',
+    .option('mqtt.password', {
+      alias: ['mqtt-pass', 'mqtt-password'],
       describe: 'MQTT password',
       type: 'string',
     })
-    .option('mqtt-retain', {
+    .option('mqtt.retain', {
+      alias: ['mqtt-retain'],
       describe: 'MQTT retain messages',
       type: 'boolean',
-      default: true,
+      default: false,
     })
     .option('hass-topic-root', {
-      alias: 't',
+      alias: ['t', 'hass_topic_root'],
       describe: 'Home Assistant topic root',
       type: 'string',
       default: 'homeassistant',
     })
     .option('self-topic-root', {
-      alias: 'T',
+      alias: ['T', 'self_topic_root'],
       describe: 'Self topic root',
       type: 'string',
       default: 'eufysecurity',
     })
-    .option('reconnect-period', {
-      alias: 'R',
+    .option('mqtt.reconnect-period', {
+      alias: ['R', 'reconnect-period', 'mqtt.reconnect_period'],
       describe: 'Reconnect period in milliseconds',
       type: 'number',
       default: 1000,
@@ -99,13 +102,13 @@ const argv =
       default: 'en',
     })
     .option('persistent-dir', {
-      alias: 'D',
+      alias: ['D', 'persistent_dir'],
       describe: 'Eufy Security persistent directory',
       type: 'string',
       default: process.cwd(),
     })
     .option('log-level', {
-      alias: 'l',
+      alias: ['l', 'log_level'],
       describe: 'Log level',
       type: 'string',
       default: 'info',
