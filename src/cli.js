@@ -27,6 +27,7 @@ const argv =
   yargs(hideBin(process.argv))
     .scriptName('eufy-security-mqtt')
     .usage('$0', 'Run the Eufy Security MQTT gateway')
+    .env('EUFY_SECURITY_MQTT')
     .option('username', {
       alias: 'u',
       demandOption: true,
