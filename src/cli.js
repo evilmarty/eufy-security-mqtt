@@ -148,7 +148,7 @@ const args =
 
 async function getServiceCredentials(options) {
   const fetch = require('node-fetch')
-  const header = { authorization: `Bearer ${options.supervisor.token}` }
+  const headers = { authorization: `Bearer ${options.supervisor.token}` }
   const res = await fetch(options.supervisor.url, headers)
   const { result, data } = await res.json()
 
