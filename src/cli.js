@@ -23,7 +23,7 @@ function parseConfig(configPath) {
   throw lastError
 }
 
-const argv =
+const args =
   yargs(hideBin(process.argv))
     .scriptName('eufy-security-mqtt')
     .usage('$0', 'Run the Eufy Security MQTT gateway')
@@ -124,10 +124,57 @@ const argv =
       type: 'boolean',
       default: false,
     })
-    .conflicts('mqtt-url', ['mqtt-host', 'mqtt-port'])
+    .option('hassio', {
+      describe: 'Run as a Home Assistant add-on',
+      type: 'boolean',
+      default: false,
+      conflicts: ['mqtt.url', 'mqtt.host', 'mqtt.port'],
+    })
+    .option('supervisor.url', {
+      type: 'string',
+      default: 'http://supervisor/services/mqtt',
+      requiresArg: 'hassio',
+      hidden: true,
+    })
+    .option('supervisor.token', {
+      type: 'string',
+      default: () => process.env.SUPERVISOR_TOKEN,
+      requiresArg: 'hassio',
+      hidden: true,
+    })
     .help()
     .config('config', parseConfig)
     .exitProcess()
-    .parse()
 
-new Gateway(argv)
+async function getServiceCredentials(options) {
+  const fetch = require('node-fetch')
+  const header = { authorization: `Bearer ${options.supervisor.token}` }
+  const res = await fetch(options.supervisor.url, headers)
+  const { result, data } = await res.json()
+
+  if (result !== 'ok') {
+    throw new Error(`Invalid supervisor response: ${data}`)
+  }
+
+  return {
+    ...options,
+    mqtt: {
+      ...options.mqtt,
+      host: data.host,
+      port: data.port,
+      username: data.username,
+      password: data.password,
+    },
+  }
+}
+
+async function main() {
+  let options = await args.parseAsync()
+
+  if (options.hassio) {
+    options = await getServiceCredentials(options)
+  }
+  const gateway = new Gateway(options)
+}
+
+main()
