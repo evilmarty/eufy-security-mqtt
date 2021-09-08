@@ -156,9 +156,17 @@ class Gateway {
 
     this.mqttClient.on('message', (topic, message) => {
       this.logger.debug(`Received message from MQTT broker - ${topic} - ${message}`)
-      const listeners = this.listeners[topic] || []
-      listeners.forEach(listener => {
-        listener.handler.call(listener.context, message)
+
+      Object.values(this.components).forEach(component => {
+        if (component.setValue && this.commandTopic(component) == topic) {
+          try {
+            component.setValue(message)
+          }
+          catch (error) {
+            this.logger.error(`Error trying to update component state - ${component.id}`)
+            this.logger.debug(error)
+          }
+        }
       })
     })
 
@@ -221,12 +229,7 @@ class Gateway {
     })
 
     await Promise.allSettled(
-      components.map(component => {
-        if (component.setValue) {
-          this.addListener(component.commandTopic, component.setValue, component)
-        }
-        return this.publish(this.configTopic(component), component.config)
-      })
+      components.map(component => this.publish(this.configTopic(component), component.config))
     )
 
     await sleep(1000)
@@ -239,15 +242,7 @@ class Gateway {
   async deregisterDevice(device) {
     const metadata = device.getPropertiesMetadata()
     await Promise.allSettled(
-      Object.values(metadata).forEach(property => {
-        const component = this.components[id(device, property)]
-        if (component) {
-          if (component.setValue) {
-            this.addListener(component.commandTopic, component.setValue, component)
-          }
-          return this.publish(this.configTopic(component), {})
-        }
-      })
+      components.map(component => this.publish(this.configTopic(component), {}))
     )
   }
 
@@ -257,17 +252,6 @@ class Gateway {
     if (component) {
       await component.update()
     }
-  }
-
-  addListener(topic, handler, context = null) {
-    const listener = { handler, context }
-    const listeners = this.listeners[topic] || []
-    this.listeners[topic] = [ ...listeners, listener ]
-  }
-
-  removeListener(topic, handler) {
-    const listeners = this.listeners[topic] || []
-    this.listeners[topic] = listeners.filter(x => x.handler !== handler)
   }
 }
 
