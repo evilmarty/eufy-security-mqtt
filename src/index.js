@@ -218,15 +218,22 @@ class Gateway {
     await this.publish(this.availabilityTopic, available ? STATUS_ONLINE : STATUS_OFFLINE)
   }
 
-  async registerDevice(device) {
+  deviceComponents(device, createComponents = false) {
     const metadata = device.getPropertiesMetadata()
-    const components = Object.values(metadata).map(property => {
-      const key = id(device, property)
-      if (!(key in this.components)) {
-        this.components[key] = factory(this, device, property)
-      }
-      return this.components[key]
-    })
+    return Object
+      .values(metadata)
+      .map(property => {
+        const key = id(device, property)
+        if (!(key in this.components) && createComponents) {
+          this.components[key] = factory(this, device, property)
+        }
+        return this.components[key]
+      })
+      .filter(x => x)
+  }
+
+  async registerDevice(device) {
+    const components = this.deviceComponents(device, true)
 
     await Promise.allSettled(
       components.map(component => this.publish(this.configTopic(component), component.config))
@@ -240,7 +247,8 @@ class Gateway {
   }
 
   async deregisterDevice(device) {
-    const metadata = device.getPropertiesMetadata()
+    const components = this.deviceComponents(device, false)
+
     await Promise.allSettled(
       components.map(component => this.publish(this.configTopic(component), {}))
     )
