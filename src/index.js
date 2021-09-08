@@ -9,6 +9,7 @@ const DUMMY_COMPONENT = { id: '+', type: '+' }
 
 class Gateway {
   constructor(options) {
+    this.closed = false
     this.options = options
     this.components = {}
     this.listeners = {}
@@ -56,7 +57,10 @@ class Gateway {
     this.eufyClient.on('close', () => {
       this.publishAvailability(false)
       this.logger.info('Disconnected from Eufy Security.')
-      this.mqttClient.end()
+
+      if (!this.close) {
+        setTimeout(() => this.connect(), this.options.mqtt.reconnectPeriod)
+      }
     })
 
     this.eufyClient.on('station added', async (station) => {
@@ -138,18 +142,11 @@ class Gateway {
         this.mqttClient.unsubscribe(this.configTopic(DUMMY_COMPONENT)),
       ])
 
-      this.logger.info('Connecting to Eufy Security...')
-      const connected = await this.eufyClient.connect()
-      if (!connected) {
-        this.logger.error('Could not connect to Eufy Security.')
-        this.mqttClient.end()
-      }
+      await this.connect()
     })
 
     this.mqttClient.on('close', () => {
       this.logger.info('Disconnected from MQTT broker.')
-      this.eufyClient.close()
-      process.exit()
     })
 
     this.mqttClient.on('offline', () => {
@@ -190,8 +187,36 @@ class Gateway {
     })
 
     process.on('SIGINT', () => {
-      this.eufyClient.close()
+      if (this.closed) {
+        process.exit()
+      }
+      else {
+        this.close()
+      }
     })
+  }
+
+  async connect() {
+    if (this.eufyClient.isConnected()) {
+      await this.publishAvailability(true)
+      return
+    }
+
+    this.logger.info('Connecting to Eufy Security...')
+    const connected = await this.eufyClient.connect()
+    if (!connected) {
+      this.logger.error('Could not connect to Eufy Security.')
+      this.close()
+      return
+    }
+
+    await this.publishAvailability(true)
+  }
+
+  close() {
+    this.closed = true
+    this.eufyClient.close()
+    this.mqttClient.end()
   }
 
   get availabilityTopic() {
