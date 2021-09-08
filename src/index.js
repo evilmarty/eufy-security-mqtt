@@ -126,6 +126,7 @@ class Gateway {
       this.logger.info(`Connected to MQTT broker: ${options.protocol}://${options.hostname}:${options.port}`)
 
       await Promise.allSettled([
+        this.mqttClient.subscribe(this.hassStatusTopic),
         this.mqttClient.subscribe(this.commandTopic(DUMMY_COMPONENT)),
         this.mqttClient.subscribe(this.availabilityTopic),
         this.mqttClient.subscribe(this.stateTopic(DUMMY_COMPONENT)),
@@ -156,6 +157,20 @@ class Gateway {
 
     this.mqttClient.on('message', (topic, message) => {
       this.logger.debug(`Received message from MQTT broker - ${topic} - ${message}`)
+
+      if (topic == this.hassStatusTopic) {
+        if (message == STATUS_ONLINE) {
+          this.logger.info('Home Assistant is back online')
+          this.publishAvailability(true)
+          this.publishAllComponents()
+        }
+        else if (message == STATUS_OFFLINE) {
+          this.logger.info('Home Assistant has gone offline')
+        }
+        else {
+          this.logger.debug(`Home Assistant is in an unknown state: ${message}`)
+        }
+      }
 
       Object.values(this.components).forEach(component => {
         if (component.setValue && this.commandTopic(component) == topic) {
@@ -195,6 +210,10 @@ class Gateway {
     return topic(this.options.hassTopicRoot, component.type, component.id, 'config')
   }
 
+  get hassStatusTopic() {
+    return topic(this.options.hassTopicRoot, 'status')
+  }
+
   async publish(topic, data) {
     if (data === null || data === undefined) {
       return
@@ -212,6 +231,12 @@ class Gateway {
       this.logger.debug(`Publish failed - ${topic}: ${detail}`)
       throw error
     }
+  }
+
+  async publishAllComponents() {
+    await Promise.allSettled(
+      Object.values(this.components).map(component => component.update())
+    )
   }
 
   async publishAvailability(available) {
