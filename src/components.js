@@ -40,13 +40,24 @@ class BaseComponent {
   }
 
   async update() {
-    const value = await this.getValue()
-    this.gateway.publish(this.stateTopic, value)
+    try {
+      const value = await this.getValue()
+      this.gateway.publish(this.stateTopic, value)
+    }
+    catch (error) {
+      this.gateway.logger.error(`Error updating ${this.device.getStateChannel()} - ${error}`)
+      throw error
+    }
+  }
+
+  rawValue() {
+    const { value } = this.device.getPropertyValue(this.property.name) || {}
+    return value
   }
 
   async getValue() {
-    const { name, states } = this.property
-    const { value } = this.device.getPropertyValue(name) || {}
+    const { states } = this.property
+    const value = this.rawValue
 
     return states ? states[value] : value
   }
@@ -95,7 +106,7 @@ class AlarmComponent extends BaseComponent {
   config = new AlarmConfig(this)
 
   async getValue() {
-    const value = await super.getValue()
+    const value = this.rawValue
     switch (value) {
       case GuardMode.AWAY:
         return ARM_AWAY
@@ -103,6 +114,8 @@ class AlarmComponent extends BaseComponent {
         return ARM_HOME
       case GuardMode.DISARMED:
         return DISARM
+      default:
+        this.gateway.logger.debug(`Unknown alarm state for ${this.device.getStateChannel()}: ${value}`)
     }
   }
 
