@@ -165,7 +165,7 @@ class Gateway {
           this.logger.info('Home Assistant has gone offline')
         }
         else {
-          this.logger.debug(`Home Assistant is in an unknown state: ${message}`)
+          this.logger.warn(`Home Assistant is in an unknown state: ${message}`)
         }
       }
 
