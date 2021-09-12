@@ -294,6 +294,8 @@ class Gateway {
     await Promise.allSettled(
       components.map(component => component.update())
     )
+
+    await this.publishAvailability(true)
   }
 
   async deregisterDevice(device) {
