@@ -50,7 +50,7 @@ class BaseComponent {
     }
   }
 
-  rawValue() {
+  get rawValue() {
     const { value } = this.device.getPropertyValue(this.property.name) || {}
     return value
   }
