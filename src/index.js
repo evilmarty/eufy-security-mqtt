@@ -307,8 +307,8 @@ class Gateway {
   }
 
   async updateComponent(device, name) {
-    const property = device.getPropertyMetadata(name)
-    const component = this.components[id(device, property)]
+    const property = device.getPropertiesMetadata()[name]
+    const component = property && this.components[id(device, property)]
     if (component) {
       await component.update()
     }
