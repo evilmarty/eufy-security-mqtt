@@ -46,7 +46,6 @@ class BaseComponent {
     }
     catch (error) {
       this.gateway.logger.error(`Error updating ${this.device.getStateChannel()} - ${error}`)
-      throw error
     }
   }
 
