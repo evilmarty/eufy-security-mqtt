@@ -1,6 +1,16 @@
 const winston = require('winston')
 const MQTT = require('async-mqtt')
-const { EufySecurity, GuardMode, ParamType, CommandType } = require('eufy-security-client')
+const {
+  EufySecurity,
+  GuardMode,
+  ParamType,
+  CommandType,
+  DeviceCryingDetectedProperty,
+  DeviceMotionDetectedProperty,
+  DevicePetDetectedProperty,
+  DeviceRingingProperty,
+  DeviceSoundDetectedProperty,
+} = require('eufy-security-client')
 const { STATUS_ONLINE, STATUS_OFFLINE } = require('./constants')
 const factory = require('./lookup')
 const { id, topic, sleep } = require('./utils')
@@ -73,8 +83,8 @@ class Gateway {
       await this.deregisterDevice(station)
     })
 
-    this.eufyClient.on('station guard mode', async (station, guardMode, currentMode) => {
-      this.logger.info(`Station ${station.getSerial()} - guard mode changed from ${GuardMode[guardMode]} to ${GuardMode[currentMode]}`)
+    this.eufyClient.on('station guard mode', async (station, guardMode) => {
+      this.logger.info(`Station ${station.getSerial()} - guard mode changed to ${GuardMode[guardMode]}`)
     })
 
     this.eufyClient.on('station property changed', async (station, name, value) => {
@@ -83,6 +93,7 @@ class Gateway {
     })
 
     this.eufyClient.on('station rtsp url', (station, device, value, modified) => {
+      this.logger.debug(`Station ${station.getSerial()} - RTSP updated`)
     })
 
     this.eufyClient.on('device added', async (device) => {
@@ -101,24 +112,44 @@ class Gateway {
     })
 
     this.eufyClient.on('device crying detected', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - crying ${state ? 'detected' : 'undetected'}`)
+      this.updateComponent(device, DeviceCryingDetectedProperty.name, state)
     })
 
     this.eufyClient.on('device sound detected', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - sound ${state ? 'detected' : 'undetected'}`)
+      this.updateComponent(device, DeviceSoundDetectedProperty.name, state)
     })
 
     this.eufyClient.on('device pet detected', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - pet ${state ? 'detected' : 'undetected'}`)
+      this.updateComponent(device, DevicePetDetectedProperty.name, state)
     })
 
     this.eufyClient.on('device motion detected', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - motion ${state ? 'detected' : 'undetected'}`)
+      this.updateComponent(device, DeviceMotionDetectedProperty.name, state)
     })
 
     this.eufyClient.on('device rings', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - door bell ${state ? 'started' : 'stopped'} ringing`)
+      this.updateComponent(device, DeviceRingingProperty.name, state)
     })
 
     this.eufyClient.on('device locked', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - device ${state ? 'locked' : 'unlocked'}`)
     })
 
     this.eufyClient.on('device open', (device, state) => {
+      this.logger.info(`Device ${device.getSerial()} - device ${state ? 'opened' : 'closed'}`)
+    })
+
+    this.eufyClient.on('push connect', () => {
+      this.logger.info(`Push notifications are available`)
+    })
+
+    this.eufyClient.on('push close', (message) => {
+      this.logger.info(`Push notifications are unavailable`)
     })
 
     this.eufyClient.on('push message', (message) => {
@@ -306,11 +337,11 @@ class Gateway {
     )
   }
 
-  async updateComponent(device, name) {
+  async updateComponent(device, name, ...args) {
     const property = device.getPropertiesMetadata()[name]
     const component = property && this.components[id(device, property)]
     if (component) {
-      await component.update()
+      await component.update(...args)
     }
   }
 }

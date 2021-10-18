@@ -39,9 +39,9 @@ class BaseComponent {
     return id(this.device, this.property)
   }
 
-  async update() {
+  async update(value = this.getValue()) {
     try {
-      const value = await this.getValue()
+      value = await value
       this.gateway.publish(this.stateTopic, value)
     }
     catch (error) {
