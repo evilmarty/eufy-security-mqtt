@@ -295,7 +295,10 @@ class Gateway {
       .map(property => {
         const key = id(device, property)
         if (!(key in this.components) && createComponents) {
-          this.components[key] = factory(this, device, property)
+          const component = factory(this, device, property)
+          if (component) {
+            this.components[key] = factory(this, device, property)
+          }
         }
         return this.components[key]
       })

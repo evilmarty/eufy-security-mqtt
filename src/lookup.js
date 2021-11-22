@@ -10,7 +10,14 @@ const {
 
 const COMPONENTS = {
   [ParamType.GUARD_MODE]: AlarmComponent,
+  [CommandType.CMD_GET_DEV_STATUS]: null,
   'cover_path': CameraComponent,
+  'device_name': null,
+  'device_model': null,
+  'device_sn': null,
+  'device_type': null,
+  'main_hw_version': null,
+  'main_sw_version': null,
 }
 
 function match({ key, type, writeable, states }, experimental = false) {
@@ -27,7 +34,9 @@ function match({ key, type, writeable, states }, experimental = false) {
 
 function factory(gateway, device, property) {
   const constructor = match(property, gateway.options.experimental)
-  return new constructor(gateway, device, property)
+  if (typeof(constructor) === 'function') {
+    return new constructor(gateway, device, property)
+  }
 }
 
 module.exports = factory
