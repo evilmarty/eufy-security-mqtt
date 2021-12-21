@@ -42,7 +42,7 @@ class BaseComponent {
   async update(value = this.getValue()) {
     try {
       value = await value
-      this.gateway.publish(this.stateTopic, value)
+      await this.gateway.publish(this.stateTopic, value)
     }
     catch (error) {
       this.gateway.logger.error(`Error updating ${this.device.getStateChannel()} - ${error}`)

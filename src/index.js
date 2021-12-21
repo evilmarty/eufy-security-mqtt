@@ -178,7 +178,6 @@ class Gateway {
       if (topic == this.hassStatusTopic) {
         if (message == STATUS_ONLINE) {
           this.logger.info('Home Assistant is back online')
-          this.publishAvailability(true)
           this.publishAllComponents()
         }
         else if (message == STATUS_OFFLINE) {
@@ -279,9 +278,15 @@ class Gateway {
   }
 
   async publishAllComponents() {
+    const components = Object.values(this.components)
     await Promise.allSettled(
-      Object.values(this.components).map(component => component.update())
+      components.map(component => this.publish(this.configTopic(component), component.config))
     )
+    await sleep(1000)
+    await Promise.allSettled(
+      components.map(component => component.update())
+    )
+    await this.publishAvailability(true)
   }
 
   async publishAvailability(available) {
