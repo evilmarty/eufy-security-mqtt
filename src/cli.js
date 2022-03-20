@@ -1,8 +1,8 @@
-const fs = require('fs')
-const yargs = require('yargs/yargs')
-const YAML = require('yaml')
-const { hideBin } = require('yargs/helpers')
-const Gateway = new require('./index')
+import fs from 'fs'
+import yargs from 'yargs'
+import YAML from 'yaml'
+import { hideBin } from 'yargs/helpers'
+import Gateway from './index.js'
 
 const PARSERS = [JSON, YAML]
 

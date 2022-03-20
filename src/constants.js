@@ -1,22 +1,22 @@
-const { ParamType, CommandType } = require('eufy-security-client')
+import { ParamType, CommandType } from 'eufy-security-client'
 
-exports.TYPE_NUMBER = 'number'
-exports.TYPE_OBJECT = 'object'
+export const TYPE_NUMBER = 'number'
+export const TYPE_OBJECT = 'object'
 
-exports.MANUFACTURER = 'Eufy Security'
+export const MANUFACTURER = 'Eufy Security'
 
-exports.STATUS_ONLINE = 'online'
-exports.STATUS_OFFLINE = 'offline'
+export const STATUS_ONLINE = 'online'
+export const STATUS_OFFLINE = 'offline'
 
-exports.STATE_ON = 'on'
-exports.STATE_OFF = 'off'
-exports.STATE_CLASS_MEASUREMENT = 'measurement'
+export const STATE_ON = 'on'
+export const STATE_OFF = 'off'
+export const STATE_CLASS_MEASUREMENT = 'measurement'
 
-exports.ARM_AWAY = 'armed_away'
-exports.ARM_HOME = 'armed_home'
-exports.DISARM = 'disarmed'
+export const ARM_AWAY = 'armed_away'
+export const ARM_HOME = 'armed_home'
+export const DISARM = 'disarmed'
 
-exports.DEVICE_CLASS = {
+export const DEVICE_CLASS = {
   charging_days: undefined,
   charing_total: 'power_factor',
   charging_reserve: 'power_factor',

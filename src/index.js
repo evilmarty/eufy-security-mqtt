@@ -1,13 +1,13 @@
-const winston = require('winston')
-const MQTT = require('async-mqtt')
-const {  EufySecurity, GuardMode } = require('eufy-security-client')
-const { STATUS_ONLINE, STATUS_OFFLINE } = require('./constants')
-const factory = require('./lookup')
-const { id, topic, sleep } = require('./utils')
+import winston from 'winston'
+import MQTT from 'async-mqtt'
+import {  EufySecurity, GuardMode } from 'eufy-security-client'
+import { STATUS_ONLINE, STATUS_OFFLINE } from './constants.js'
+import factory from './lookup.js'
+import { id, topic, sleep } from './utils.js'
 
 const DUMMY_COMPONENT = { id: '+', type: '+' }
 
-class Gateway {
+export default class {
   constructor(options) {
     this.closed = false
     this.options = options
@@ -342,5 +342,3 @@ class Gateway {
     }
   }
 }
-
-module.exports = Gateway

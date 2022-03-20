@@ -4,6 +4,7 @@
   "description": "Eufy Security to MQTT Gateway intended for use with Home Assistant or other platforms that use the MQTT discovery mechanism.",
   "repository": "https://github.com/evilmarty/eufy-security-mqtt",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "start": "node src/cli.js",
     "help": "node src/cli.js --help"

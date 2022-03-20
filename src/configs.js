@@ -1,4 +1,4 @@
-const {
+import {
   ARM_AWAY,
   ARM_HOME,
   DEVICE_CLASS,
@@ -9,10 +9,10 @@ const {
   STATUS_OFFLINE,
   STATUS_ONLINE,
   TYPE_NUMBER,
-} = require('./constants')
-const { deviceInfo } = require('./utils')
+} from './constants.js'
+import { deviceInfo } from './utils.js'
 
-class BaseConfig {
+export class BaseConfig {
   constructor(component) {
     this.availability_topic = component.availabilityTopic
     this.device = deviceInfo(component.device)
@@ -24,21 +24,21 @@ class BaseConfig {
   }
 }
 
-class StateConfig extends BaseConfig {
+export class StateConfig extends BaseConfig {
   constructor(component) {
     super(component)
     this.state_topic = component.stateTopic
   }
 }
 
-class CommandConfig extends StateConfig {
+export class CommandConfig extends StateConfig {
   constructor(component) {
     super(component)
     this.command_topic = component.commandTopic
   }
 }
 
-class BinarySensorConfig extends StateConfig {
+export class BinarySensorConfig extends StateConfig {
   constructor(component) {
     super(component)
     this.device_class = DEVICE_CLASS[component.property.key]
@@ -47,7 +47,7 @@ class BinarySensorConfig extends StateConfig {
   }
 }
 
-class SwitchConfig extends CommandConfig {
+export class SwitchConfig extends CommandConfig {
   constructor(component) {
     super(component)
     this.payload_on = STATE_ON
@@ -55,7 +55,7 @@ class SwitchConfig extends CommandConfig {
   }
 }
 
-class SensorConfig extends StateConfig {
+export class SensorConfig extends StateConfig {
   constructor(component) {
     const { unit, states, type } = component.property
     super(component)
@@ -67,14 +67,14 @@ class SensorConfig extends StateConfig {
   }
 }
 
-class SelectConfig extends CommandConfig {
+export class SelectConfig extends CommandConfig {
   constructor(component) {
     super(component)
     this.options = Object.values(component.property.states)
   }
 }
 
-class AlarmConfig extends CommandConfig {
+export class AlarmConfig extends CommandConfig {
   constructor(component) {
     super(component)
     this.code_arm_required = false
@@ -85,18 +85,9 @@ class AlarmConfig extends CommandConfig {
   }
 }
 
-class CameraConfig extends BaseConfig {
+export class CameraConfig extends BaseConfig {
   constructor(component) {
     super(component)
     this.topic = component.stateTopic
   }
-}
-
-module.exports = {
-  AlarmConfig,
-  BinarySensorConfig,
-  CameraConfig,
-  SelectConfig,
-  SensorConfig,
-  SwitchConfig,
 }

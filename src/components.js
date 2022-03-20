@@ -1,22 +1,21 @@
-const fetch = require('node-fetch')
-const { GuardMode, ParamType, CommandType } = require('eufy-security-client')
-const {
+import fetch from 'node-fetch'
+import { GuardMode, ParamType, CommandType } from 'eufy-security-client'
+import {
   ARM_AWAY,
   ARM_HOME,
   DISARM,
-} = require('./constants')
-const {
+} from './constants.js'
+import {
   AlarmConfig,
-  BatteryLowConfig,
   BinarySensorConfig,
   CameraConfig,
   SelectConfig,
   SensorConfig,
   SwitchConfig,
-} = require('./configs')
-const { id } = require('./utils')
+} from './configs.js'
+import { id } from './utils.js'
 
-class BaseComponent {
+export class BaseComponent {
   constructor(gateway, device, property) {
     this.gateway = gateway
     this.device = device
@@ -62,7 +61,7 @@ class BaseComponent {
   }
 }
 
-class BinarySensorComponent extends BaseComponent {
+export class BinarySensorComponent extends BaseComponent {
   type = 'binary_sensor'
   config = new BinarySensorConfig(this)
 
@@ -72,12 +71,12 @@ class BinarySensorComponent extends BaseComponent {
   }
 }
 
-class SensorComponent extends BaseComponent {
+export class SensorComponent extends BaseComponent {
   type = 'sensor'
   config = new SensorConfig(this)
 }
 
-class SwitchComponent extends BaseComponent {
+export class SwitchComponent extends BaseComponent {
   type = 'switch'
   config = new SwitchConfig(this)
 
@@ -95,12 +94,12 @@ class SwitchComponent extends BaseComponent {
   }
 }
 
-class SelectComponent extends BaseComponent {
+export class SelectComponent extends BaseComponent {
   type = 'select'
   config = new SelectConfig(this)
 }
 
-class AlarmComponent extends BaseComponent {
+export class AlarmComponent extends BaseComponent {
   type = 'alarm_control_panel'
   config = new AlarmConfig(this)
 
@@ -144,7 +143,7 @@ class AlarmComponent extends BaseComponent {
   }
 }
 
-class CameraComponent extends BaseComponent {
+export class CameraComponent extends BaseComponent {
   type = 'camera'
   config = new CameraConfig(this)
 
@@ -153,13 +152,4 @@ class CameraComponent extends BaseComponent {
     const res = await fetch(value)
     return await res.buffer()
   }
-}
-
-module.exports = {
-  AlarmComponent,
-  BinarySensorComponent,
-  CameraComponent,
-  SelectComponent,
-  SensorComponent,
-  SwitchComponent,
 }

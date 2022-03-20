@@ -1,12 +1,12 @@
-const { ParamType, CommandType } = require('eufy-security-client')
-const {
+import { ParamType, CommandType } from 'eufy-security-client'
+import {
   BinarySensorComponent,
   SensorComponent,
   SwitchComponent,
   SelectComponent,
   AlarmComponent,
   CameraComponent,
-} = require('./components')
+} from './components.js'
 
 const COMPONENTS = {
   [ParamType.GUARD_MODE]: AlarmComponent,
@@ -37,11 +37,9 @@ function match({ key, type, writeable, states }, experimental = false) {
   }
 }
 
-function factory(gateway, device, property) {
+export default function(gateway, device, property) {
   const constructor = match(property, gateway.options.experimental)
   if (typeof(constructor) === 'function') {
     return new constructor(gateway, device, property)
   }
 }
-
-module.exports = factory

@@ -1,20 +1,20 @@
-const { MANUFACTURER } = require('./constants')
+import { MANUFACTURER } from './constants.js'
 
-exports.sleep = function(time) {
+export function sleep(time) {
   return new Promise(resolve => setTimeout(resolve, time))
 }
 
-exports.id = function(device, property = {name: null, key: null}) {
+export function id(device, property = {name: null, key: null}) {
   return [device.getStateChannel(), device.getSerial(), property.name || property.key]
     .filter(x => x)
     .join('_')
 }
 
-exports.topic = function(...parts) {
+export function topic(...parts) {
   return parts.join('/')
 }
 
-exports.deviceInfo = function(device) {
+export function deviceInfo(device) {
   const connections = device.getMACAddress && [['mac', device.getMACAddress()]]
   const via_device = device.getStationSerial && device.getStationSerial()
   return {
