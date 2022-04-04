@@ -2,6 +2,7 @@ import fs from 'fs'
 import yargs from 'yargs'
 import YAML from 'yaml'
 import { hideBin } from 'yargs/helpers'
+import fetch from 'node-fetch'
 import Gateway from './index.js'
 
 const PARSERS = [JSON, YAML]
@@ -147,7 +148,6 @@ const args =
     .exitProcess()
 
 async function getServiceCredentials(options) {
-  const fetch = require('node-fetch')
   const headers = { authorization: `Bearer ${options.supervisor.token}` }
   const res = await fetch(options.supervisor.url, { headers })
   const { result, data } = await res.json()
