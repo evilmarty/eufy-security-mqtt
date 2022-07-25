@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "async-mqtt": "^2.6.2",
-    "eufy-security-client": "^1.6.6",
+    "eufy-security-client": "^2.1.1",
     "node-fetch": "^3.2.9",
     "winston": "^3.8.1",
     "yaml": "^2.1.1",
